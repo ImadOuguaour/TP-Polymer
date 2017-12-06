@@ -1,0 +1,77 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="bootstrap-classes.html">
+
+<dom-module id="my-starships">
+  <template>
+    <style include="bootstrap-classes">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+    </style>
+
+    <iron-ajax auto id="ex" url="https://swapi.co/api/starships" handle-as="json" last-response="{{ajaxResponse}}" on-response="handleResponse"
+      debounce-duration="300">
+    </iron-ajax>
+
+    <div class="row">
+      <div class="col-lg-8">
+          <b style="font-size:1.5em;color:rgb(25, 26, 102);font-family:Verdana, Geneva, Tahoma, sans-serif">Starships</b><br><br>
+        </div>
+      <div class="col-lg-4 form-group form-inline">
+        <input type="text" class="form-control" id="search">
+        <button class="btn btn-primary" on-click="getSearch">Search</button>
+      </div>
+    </div>
+    <div class="row">
+      <template is="dom-repeat" items="[[ajaxResponse.results]]" as="starship">
+
+        <div class="col-sm-6 col-md-4">
+          <div class="thumbnail">
+            <img height="100%" width="100%" src="https://crt15.files.wordpress.com/2013/01/spaceship.png">
+            <div class="caption">
+              <h4>[[starship.name]]</h4>
+              <p>
+                <a on-click="get_starship" class="btn btn-primary" role="button">Détails</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </template>
+
+  <script>
+    class MyStarships extends Polymer.Element {
+      static get is() { return 'my-starships'; }
+
+      getSearch() {
+        this.$.ex.url = "https://swapi.co/api/starships/?search=" + this.$.search.value;
+        this.$.ex.generateRequest();
+        //console.log(this.$.search.value);
+      }
+
+      get_starship(e) {
+        //this.$.film.generateRequest();
+        var id = e.model.__data.starship.url.split('/');
+        location.href = "/starshipdetail/" + id[5];
+        //console.log(e.model.__data.starship.url.split('/'));
+      }
+    }
+
+    window.customElements.define(MyStarships.is, MyStarships);
+  </script>
+</dom-module>

@@ -1,0 +1,106 @@
+<!-- Load the Polymer.Element base class -->
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="bootstrap-classes.html">
+
+
+<dom-module id="my-filmdetail">
+  <template>
+    <style include="shared-styles ">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+
+      .button {
+        background-color: aqua;
+        border: none;
+        color: rgb(5, 3, 3);
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
+    </style>
+    <app-route route="{{route}}" pattern="/:idFilm" data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <iron-ajax auto url="https://swapi.co/api/films/{{routeData.idFilm}}" handle-as="json" on-response="handleResponse" last-response="{{film}}"
+      on-response="handleResponse" debounce-duration="300">
+    </iron-ajax>
+    <iron-ajax id="get_acteur" url="" handle-as="json" last-response="{{acteurs}}" on-response="actors" debounce-duration="300">
+    </iron-ajax>
+
+
+    <div class="card">
+      <div class="circle">{{routeData.idFilm}}</div>
+      <div>
+        <h1>{{film.title}} ({{film.release_date}})</h1>
+        <div>
+          <h4 style="color:black">Directeur</h4>
+          {{film.director}}
+          <h4 style="color:black">Producteur</h4>
+          {{film.producer}}
+          <h4 style="color:black">Description</h4>
+          {{film.opening_crawl}}
+          <h4 style="color:black">Acteurs Participants</h4>
+          <template is="dom-repeat" items="{{tab_acteurs}}" as="acteur">
+            <a title="Details" on-click="get_film" class="button">{{acteur.name}}</a>
+
+          </template>
+        </div>
+      </div>
+    </div>
+  </template>
+  <script>
+    // Your new element extends the Polymer.Element base class
+    class MyFilmdetail extends Polymer.Element {
+      static get is() { return 'my-filmdetail'; }
+      static get properties() {
+        return {
+          tab_acteurs: {
+            type: Array,
+            value: []
+          }
+        }
+      }
+
+
+
+      get_film(e) {
+        //href="https://swapi.co/api/people/{{acteur.url}}"
+        var id = e.model.__data.acteur.url;
+        location.href = "/acteurdetail/" + id;
+
+      }
+
+      handleResponse(e) {
+        var tab = [];
+        for (let i = 0; i < this.film.characters.length; i++) {
+          tab[i] = this.film.characters[i].split("/")[5];
+          this.$.get_acteur.url = "https://swapi.co/api/people/" + tab[i];
+          this.$.get_acteur.generateRequest();
+        }
+
+      }
+      actors(e) {
+
+
+        this.push('tab_acteurs', { name: e.detail.__data.response.name, url: e.detail.url.split("/")[5] });
+
+        //console.log(this.tab_acteurs)
+
+      }
+
+
+
+    }
+    //Now, register your new custom element so the browser can use it
+    customElements.define(MyFilmdetail.is, MyFilmdetail);
+  </script>
+</dom-module>
